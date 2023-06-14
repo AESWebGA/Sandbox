@@ -1,0 +1,14 @@
+{
+  "name": "ts-toolbelt",
+  "version": "0.1.0",
+  "description": "toolbelt sandbox",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ts-toolbelt": "^9.6.0"
+  }
+}
