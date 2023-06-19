@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "esbuild-schinveld": "esbuild ./src/schinveld.ts --bundle --outfile=out/schinveld.js --external:vscode --format=cjs --platform=node --loader:.html=text",
+    "build-schinveld": "npm run esbuild-schinveld -- --sourcemap --watch",
     "esbuild-base": "esbuild ./src/app.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node --loader:.html=text",
     "build": "npm run esbuild-base -- --sourcemap --watch"
   },
