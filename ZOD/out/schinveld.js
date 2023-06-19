@@ -11447,7 +11447,7 @@ var weatherArray = z.array(z.object({
   time: z.string()
 }));
 var weatherArrayStore = [];
-import_jquery.default.getJSON("https://api.open-meteo.com/v1/forecast?latitude=50.97&longitude=5.98&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=GMT", (data) => {
+import_jquery.default.getJSON("https://api.open-meteo.com/v1/forecast?latitude=50.97&longitude=5.98&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=Europe%2FBerlin", (data) => {
   weatherDataStore = weatherData.parse(data);
   for (let index = 0; index < weatherDataStore.hourly.time.length; index++) {
     weatherArrayStore.push({ time: weatherDataStore.hourly.time[index], temp: weatherDataStore.hourly.temperature_2m[index] });

@@ -28,7 +28,7 @@ const weatherArray = z.array(z.object({
 
 let weatherArrayStore: z.infer<typeof weatherArray> = [];
 
-$.getJSON('https://api.open-meteo.com/v1/forecast?latitude=50.97&longitude=5.98&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=GMT', data => { // Schinveld
+$.getJSON('https://api.open-meteo.com/v1/forecast?latitude=50.97&longitude=5.98&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=Europe%2FBerlin', data => { // Schinveld
     weatherDataStore = weatherData.parse(data);
 
     for (let index = 0; index < weatherDataStore.hourly.time.length; index++) {
