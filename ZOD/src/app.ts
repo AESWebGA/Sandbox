@@ -29,7 +29,6 @@ const weatherArray = z.array(z.object({
 let weatherArrayStore: z.infer<typeof weatherArray> = [];
 
 //$.getJSON('https://api.open-meteo.com/v1/forecast?latitude=53.52&longitude=-1.13&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=GMT', data => { // Doncaster
-//$.getJSON('https://api.open-meteo.com/v1/forecast?latitude=50.97&longitude=5.98&hourly=temperature_2m&past_days=1&forecast_days=5&timezone=GMT', data => { // Schinveld
 $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=52.18&longitude=-1.47&hourly=temperature_2m&forecast_days=5&timezone=GMT', data => {
     weatherDataStore = weatherData.parse(data);
 
