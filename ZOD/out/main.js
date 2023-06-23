@@ -6723,7 +6723,7 @@ var require_googleCharts = __commonJS({
       var queue = {};
       var ONREADYSTATECHANGE = "onreadystatechange";
       var defer, channel, port;
-      var run = function() {
+      var run2 = function() {
         var id = +this;
         if (queue.hasOwnProperty(id)) {
           var fn = queue[id];
@@ -6732,7 +6732,7 @@ var require_googleCharts = __commonJS({
         }
       };
       var listener = function(event) {
-        run.call(event.data);
+        run2.call(event.data);
       };
       if (!setTask || !clearTask) {
         setTask = function setImmediate(fn) {
@@ -6751,11 +6751,11 @@ var require_googleCharts = __commonJS({
         };
         if (_cof(process) == "process") {
           defer = function(id) {
-            process.nextTick(_ctx(run, id, 1));
+            process.nextTick(_ctx(run2, id, 1));
           };
         } else if (Dispatch && Dispatch.now) {
           defer = function(id) {
-            Dispatch.now(_ctx(run, id, 1));
+            Dispatch.now(_ctx(run2, id, 1));
           };
         } else if (MessageChannel) {
           channel = new MessageChannel();
@@ -6771,12 +6771,12 @@ var require_googleCharts = __commonJS({
           defer = function(id) {
             _html.appendChild(_domCreate("script"))[ONREADYSTATECHANGE] = function() {
               _html.removeChild(this);
-              run.call(id);
+              run2.call(id);
             };
           };
         } else {
           defer = function(id) {
-            setTimeout(_ctx(run, id, 1), 0);
+            setTimeout(_ctx(run2, id, 1), 0);
           };
         }
       }
@@ -6964,7 +6964,7 @@ var require_googleCharts = __commonJS({
           var value = promise._v;
           var ok = promise._s == 1;
           var i = 0;
-          var run2 = function(reaction) {
+          var run3 = function(reaction) {
             var handler = ok ? reaction.ok : reaction.fail;
             var resolve = reaction.resolve;
             var reject = reaction.reject;
@@ -7003,7 +7003,7 @@ var require_googleCharts = __commonJS({
             }
           };
           while (chain.length > i)
-            run2(chain[i++]);
+            run3(chain[i++]);
           promise._c = [];
           promise._n = false;
           if (isReject && !promise._h)
@@ -7739,6 +7739,10 @@ var require_googleCharts = __commonJS({
     });
   }
 });
+
+// src/app.ts
+var import_jquery = __toESM(require_jquery());
+var import_google_charts = __toESM(require_googleCharts());
 
 // node_modules/zod/lib/index.mjs
 var util;
@@ -11422,11 +11426,10 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 
-// src/app.ts
-var import_jquery = __toESM(require_jquery());
-var import_google_charts = __toESM(require_googleCharts());
+// src/weatherModels.ts
 var hourlyData = z.object({
   temperature_2m: z.array(z.number()),
+  rain: z.array(z.number()),
   time: z.array(z.string())
 });
 var weatherData = z.object({
@@ -11434,43 +11437,78 @@ var weatherData = z.object({
   timezone: z.string(),
   hourly: hourlyData
 });
-var weatherDataStore = {
-  latitude: 0,
-  timezone: "",
-  hourly: {
-    temperature_2m: [],
-    time: []
-  }
-};
 var weatherArray = z.array(z.object({
   temp: z.number(),
+  rain: z.number(),
   time: z.string()
 }));
+
+// src/app.ts
+var chart;
 var weatherArrayStore = [];
-import_jquery.default.getJSON("https://api.open-meteo.com/v1/forecast?latitude=52.18&longitude=-1.47&hourly=temperature_2m&forecast_days=5&timezone=GMT", (data) => {
-  weatherDataStore = weatherData.parse(data);
-  for (let index = 0; index < weatherDataStore.hourly.time.length; index++) {
-    weatherArrayStore.push({ time: weatherDataStore.hourly.time[index], temp: weatherDataStore.hourly.temperature_2m[index] });
-  }
-});
-import_google_charts.GoogleCharts.load(drawChart);
+function getWeatherData(lat, lon, days, timezone) {
+  import_jquery.default.getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,rain&past_days=1&forecast_days=${days}&timezone=${timezone}`, (data) => {
+    let weatherDataStore = weatherData.parse(data);
+    if (weatherDataStore.hourly.time && weatherDataStore.hourly.time.length > 0) {
+      for (let index = 0; index < weatherDataStore.hourly.time.length; index++) {
+        let time = weatherDataStore.hourly.time[index];
+        if (time) {
+          weatherArrayStore.push({
+            time,
+            temp: weatherDataStore.hourly.temperature_2m[index],
+            rain: weatherDataStore.hourly.rain[index]
+          });
+        }
+      }
+    }
+    import_google_charts.GoogleCharts.load(drawChart);
+  });
+}
 function drawChart() {
+  if (weatherArrayStore.length === 0) {
+    return;
+  }
   let mappedData = weatherArrayStore.map((value) => {
-    return [value.time, value.temp];
+    return [value.time, value.temp, value.rain];
   });
   const data = import_google_charts.GoogleCharts.api.visualization.arrayToDataTable([
-    ["Time", "c"],
+    ["Time", "c", "rain"],
     ...mappedData
   ]);
   const options = {
     title: "Weather Chart - Gaydon",
     chartArea: {
-      height: 600
+      height: 500
+    },
+    series: {
+      0: { targetAxisIndex: 0 },
+      1: { targetAxisIndex: 1 }
+    },
+    vAxes: {
+      0: { title: "Temperature C" },
+      1: { title: "Rain mm" }
+    },
+    hAxis: {
+      title: "Time"
     }
   };
-  const chart = new import_google_charts.GoogleCharts.api.visualization.LineChart(document.getElementById("ChartDisplay"));
+  chart = new import_google_charts.GoogleCharts.api.visualization.LineChart(document.getElementById("ChartDisplay"));
   chart.draw(data, options);
 }
+function run() {
+  onDaysChanged(document.getElementById("days"));
+  setInterval(onDaysChanged, 3e5);
+}
+function onDaysChanged() {
+  let dropdown = document.getElementById("days");
+  let days = Number(dropdown.value);
+  if (days) {
+    weatherArrayStore = [];
+    getWeatherData(53.52, -1.13, days, "GMT");
+  }
+  (0, import_jquery.default)(".title").html(`Weather forcast for the next ${days} days`);
+}
+run();
 /*! Bundled license information:
 
 jquery/dist/jquery.js:

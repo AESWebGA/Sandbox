@@ -3,8 +3,10 @@ import $ from 'jquery';
 import { GoogleCharts } from 'google-charts';
 import moment from 'moment';
 import { weatherData, weatherArray } from './weatherModels';
+import {MdTabs} from '@material/web/tabs/tabs.js';
 
 let chart: any;
+let tabs = new MdTabs();
 
 // This code declares a variable, `weatherDataStore`, which is an object containing information about the weather.
 let weatherDataStore: z.infer<typeof weatherData> = {
@@ -78,6 +80,7 @@ function run() {
     // call getWeatherData every 5 minutes
     onDaysChanged(document.getElementById('days') as HTMLSelectElement);
     setInterval(onDaysChanged, 300000);
+    $('#doncasterMenu').add('selected');
 }
 
 function onDaysChanged() {
